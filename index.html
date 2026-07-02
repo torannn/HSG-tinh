@@ -1,0 +1,2350 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=device-width, initial-scale=1.0">
+    <title>HSG LaTeX Customizer & Compiler</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/v4-shims.min.css">
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --bg-card: rgba(30, 41, 59, 0.7);
+            --border-light: rgba(255, 255, 255, 0.08);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.35);
+            --accent: #10b981;
+            --accent-glow: rgba(16, 185, 129, 0.35);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(236, 72, 153, 0.12) 0%, transparent 40%);
+        }
+
+        header {
+            padding: 1.5rem 2rem;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #818cf8 0%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        header .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.04);
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            border: 1px solid var(--border-light);
+        }
+
+        header .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--accent);
+        }
+
+        .main-container {
+            display: flex;
+            flex: 1;
+            padding: 2rem;
+            gap: 2rem;
+            max-width: 1600px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Panels */
+        .panel {
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-light);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .left-panel {
+            flex: 1;
+            min-width: 450px;
+            max-width: 550px;
+        }
+
+        .right-panel {
+            flex: 2;
+            min-width: 600px;
+        }
+
+        .panel-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-header h2 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #e2e8f0;
+        }
+
+        .panel-body {
+            padding: 1.5rem;
+            flex: 1;
+            overflow-y: auto;
+            max-height: calc(100vh - 200px);
+        }
+
+        /* Form elements */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        select, input[type="text"], input[type="number"] {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        select:focus, input[type="text"]:focus, input[type="number"]:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+
+        /* Color Pickers */
+        .color-picker-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 0.5rem;
+        }
+
+        input[type="color"] {
+            -webkit-appearance: none;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            cursor: pointer;
+            background: none;
+        }
+
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        input[type="color"]::-webkit-color-swatch {
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 6px;
+        }
+
+        .rgb-text {
+            font-family: monospace;
+            font-size: 0.9rem;
+            color: var(--text-main);
+            background: transparent;
+            border: none;
+            outline: none;
+            width: 100%;
+        }
+
+        .symbol-preview-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 4px;
+            margin-left: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--primary);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            vertical-align: middle;
+            transition: all 0.2s ease;
+        }
+
+        /* Switch toggles */
+        .switch-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-light);
+            margin-bottom: 1.25rem;
+        }
+
+        .switch-container span {
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 46px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: .3s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(22px);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.95rem;
+            border: none;
+            outline: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, #4f46e5 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+            padding: 0.75rem 1.5rem;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px var(--primary-glow);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--accent) 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+            padding: 0.75rem 1.5rem;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px var(--accent-glow);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: var(--text-main);
+            padding: 0.75rem 1.25rem;
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #f87171;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.85rem;
+        }
+
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.25);
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.75rem;
+            font-size: 0.85rem;
+            border-radius: 6px;
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        /* Action bar */
+        .action-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 1rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-light);
+        }
+
+        /* Log window */
+        .log-container {
+            background: #020617;
+            border: 1px solid var(--border-light);
+            border-radius: 10px;
+            padding: 1rem;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.85rem;
+            color: #38bdf8;
+            height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            margin-bottom: 1.5rem;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.8);
+        }
+
+        /* Preview Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-light);
+            margin-bottom: 1.5rem;
+            gap: 0.5rem;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--text-muted);
+            padding: 0.75rem 1.25rem;
+            font-weight: 500;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-main);
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        /* Preview Gallery */
+        .preview-gallery {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            align-items: center;
+            background: rgba(15, 23, 42, 0.4);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-light);
+            min-height: 400px;
+            justify-content: center;
+        }
+
+        .preview-page {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.2s;
+        }
+
+        .preview-page:hover {
+            transform: scale(1.01);
+        }
+
+        .preview-placeholder {
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        .preview-placeholder i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+            opacity: 0.6;
+        }
+
+        /* Theme manager header */
+        .theme-select-row {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .theme-select-row select {
+            flex: 1;
+        }
+
+        /* Custom alert notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast-success { border-left: 4px solid var(--accent); }
+        .toast-error { border-left: 4px solid #ef4444; }
+        .toast-info { border-left: 4px solid var(--primary); }
+
+        /* Icon Picker Modal & Grid Styles */
+        .input-group-with-btn {
+            display: flex;
+            gap: 0.5rem;
+            width: 100%;
+        }
+
+        .input-group-with-btn input {
+            flex: 1;
+        }
+
+        .input-group-with-btn button {
+            white-space: nowrap;
+            padding: 0 0.85rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: var(--text-main);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .input-group-with-btn button:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+            box-shadow: 0 0 12px var(--primary-glow);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            background: #1e293b;
+            border: 1px solid var(--border-light);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 650px;
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            transform: scale(0.95);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .modal-overlay.show .modal-card {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #f8fafc;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .modal-close-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.25rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .modal-close-btn:hover {
+            color: #ef4444;
+        }
+
+        .modal-search-bar {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .modal-search-bar input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: var(--text-main);
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .modal-search-bar input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+            flex: 1;
+            background: rgba(15, 23, 42, 0.2);
+        }
+
+        .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .icon-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 0.75rem 0.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            user-select: none;
+        }
+
+        .icon-item:hover {
+            background: var(--primary-glow);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .icon-item i {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-main);
+        }
+
+        .icon-item span {
+            font-size: 0.65rem;
+            font-family: monospace;
+            color: var(--text-muted);
+            word-break: break-all;
+        }
+
+        /* Folder Info Bar CSS */
+        .folder-info-bar-new {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            background: rgba(30, 41, 59, 0.55);
+            border-bottom: 1px solid var(--border-light);
+            padding: 1rem 2rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+        @media(min-width: 1024px) {
+            .folder-info-bar-new {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+        .folder-input-group {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex: 1;
+            flex-wrap: wrap;
+        }
+        .folder-input-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 0.4rem 0.75rem;
+            border-radius: 8px;
+            min-width: 280px;
+            flex: 1;
+        }
+        .folder-input-item i {
+            color: var(--primary);
+        }
+        .folder-input-item label {
+            margin-bottom: 0;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+        .folder-input-item input {
+            background: transparent;
+            border: none;
+            padding: 0;
+            font-size: 0.85rem;
+            font-family: monospace;
+            color: var(--text-main);
+            width: 100%;
+        }
+        .folder-input-item input:focus {
+            box-shadow: none;
+            border-color: transparent;
+        }
+        .file-select-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 0.4rem 0.75rem;
+            border-radius: 8px;
+            flex-wrap: wrap;
+        }
+        .file-select-group i {
+            color: var(--accent);
+        }
+        .file-select-group label {
+            margin-bottom: 0;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+        .file-select-group select {
+            background: transparent;
+            border: none;
+            padding: 0 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-main);
+            width: auto;
+            min-width: 160px;
+            outline: none;
+        }
+
+        /* Settings Tab Menu & Panel CSS */
+        .config-tabs {
+            display: flex;
+            background: rgba(15, 23, 42, 0.4);
+            border-bottom: 1px solid var(--border-light);
+            padding: 0.5rem;
+            gap: 0.25rem;
+        }
+
+        .config-tab-btn {
+            flex: 1;
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            color: var(--text-muted);
+            padding: 0.6rem 0.4rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+            text-align: center;
+        }
+
+        .config-tab-btn:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .config-tab-btn.active {
+            color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+            border-color: rgba(99, 102, 241, 0.2);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.05);
+        }
+
+        .config-tab-btn i {
+            font-size: 1.1rem;
+        }
+
+        .config-tab-content {
+            display: none;
+            animation: fadeInTab 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes fadeInTab {
+            from {
+                opacity: 0;
+                transform: translateY(4px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .config-card {
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .config-card-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #818cf8;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 0.5rem;
+        }
+
+        .config-card-title i {
+            font-size: 1.05rem;
+        }
+
+        /* Tooltip style */
+        .tooltip-icon {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-left: 0.35rem;
+            cursor: help;
+            transition: color 0.2s;
+        }
+
+        .tooltip-icon:hover {
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1><i class="fa-solid fa-file-pdf"></i> HSG LaTeX Customizer & Compiler</h1>
+        <div class="status-indicator">
+            <span class="status-dot"></span>
+            <span>Local Backend Online</span>
+        </div>
+    </header>
+
+    <!-- Folder Info Bar -->
+    <div class="folder-info-bar-new">
+        <div class="folder-input-group">
+            <div class="folder-input-item" title="Thư mục nguồn chứa các tệp TeX cần đổi style">
+                <i class="fa-solid fa-folder-open"></i>
+                <label>Nguồn (Input):</label>
+                <input type="text" id="input-dir-path" placeholder="Đường dẫn thư mục nguồn..." onchange="applyFolders()">
+                <button class="btn btn-outline btn-sm" onclick="browseFolder('input')" style="padding: 0.2rem 0.5rem; height: auto; white-space: nowrap; font-size: 0.8rem;" title="Chọn thư mục nguồn"><i class="fa-regular fa-folder-open"></i> Chọn</button>
+            </div>
+            <div class="folder-input-item" title="Thư mục đầu ra chứa các tệp TeX sau khi đổi style">
+                <i class="fa-solid fa-file-export"></i>
+                <label>Đầu ra (Output):</label>
+                <input type="text" id="output-dir-path" placeholder="Đường dẫn thư mục đầu ra..." onchange="applyFolders()">
+                <button class="btn btn-outline btn-sm" onclick="browseFolder('output')" style="padding: 0.2rem 0.5rem; height: auto; white-space: nowrap; font-size: 0.8rem;" title="Chọn thư mục đầu ra"><i class="fa-regular fa-folder-open"></i> Chọn</button>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="applyFolders()" title="Lưu và quét các tệp TeX trong thư mục nguồn"><i class="fa-solid fa-arrows-rotate"></i> Cập nhật</button>
+        </div>
+        
+        <div class="file-select-group">
+            <i class="fa-solid fa-file-invoice"></i>
+            <label>Tệp TeX:</label>
+            <select id="file-selector" onchange="selectFile(this.value)">
+                <option value="">-- Chọn tệp TeX --</option>
+            </select>
+            <button class="btn btn-outline btn-sm" onclick="openOutputFolder()" title="Mở thư mục đầu ra trong Explorer">
+                <i class="fa-solid fa-folder-tree"></i> Mở Đầu Ra
+            </button>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <!-- Left Panel: Style Configurator -->
+        <div class="panel left-panel">
+            <div class="panel-header">
+                <h2><i class="fa-solid fa-sliders"></i> Bộ Tùy Biến Style</h2>
+            </div>
+            
+            <!-- Config Tabs -->
+            <div class="config-tabs">
+                <button class="config-tab-btn active" id="config-tab-btn-theme" onclick="switchConfigTab('theme')" title="Cấu hình Theme và Màu sắc">
+                    <i class="fa-solid fa-palette"></i>
+                    <span>Chủ đề & Màu</span>
+                </button>
+                <button class="config-tab-btn" id="config-tab-btn-layout" onclick="switchConfigTab('layout')" title="Cấu hình Trang và Header/Footer">
+                    <i class="fa-solid fa-desktop"></i>
+                    <span>Trang & Bố cục</span>
+                </button>
+                <button class="config-tab-btn" id="config-tab-btn-symbols" onclick="switchConfigTab('symbols')" title="Cấu hình Nhãn và Ký hiệu">
+                    <i class="fa-solid fa-tags"></i>
+                    <span>Nhãn & Ký hiệu</span>
+                </button>
+                <button class="config-tab-btn" id="config-tab-btn-questions" onclick="switchConfigTab('questions')" title="Cấu hình định dạng Câu hỏi">
+                    <i class="fa-solid fa-list-check"></i>
+                    <span>Định dạng Câu</span>
+                </button>
+            </div>
+
+            <div class="panel-body">
+                <!-- TAB 1: Theme & Colors -->
+                <div class="config-tab-content" id="config-tab-content-theme" style="display: block;">
+                    <!-- Theme Select & Actions -->
+                    <div class="theme-select-row">
+                        <div style="flex: 1;">
+                            <label for="theme-selector">Chọn mẫu giao diện</label>
+                            <select id="theme-selector" onchange="loadTheme(this.value)">
+                                <!-- Dynamic themes will load here -->
+                            </select>
+                        </div>
+                        <button class="btn btn-outline btn-sm" style="margin-top: 1.35rem;" onclick="createNewTheme()" title="Thêm theme mới">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                        <button class="btn btn-danger btn-sm" style="margin-top: 1.35rem;" onclick="deleteCurrentTheme()" id="delete-theme-btn" title="Xóa theme hiện tại">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+
+                    <!-- Theme Detail Config -->
+                    <div class="form-group">
+                        <label for="theme-name">Tên Theme</label>
+                        <input type="text" id="theme-name" placeholder="Ví dụ: my-purple-theme">
+                    </div>
+
+                    <div class="form-group-row">
+                        <!-- Primary Color -->
+                        <div class="form-group">
+                            <label for="primary-color-picker">Màu Chủ Đạo</label>
+                            <div class="color-picker-wrapper">
+                                <input type="color" id="primary-color-picker" oninput="updateRGBText('primary', this.value)">
+                                <input type="text" class="rgb-text" id="primary-color-rgb" placeholder="0, 102, 204" onchange="updateColorPicker('primary', this.value)">
+                            </div>
+                        </div>
+                        <!-- Accent Color -->
+                        <div class="form-group">
+                            <label for="accent-color-picker">Màu Nhấn (Đáp án)</label>
+                            <div class="color-picker-wrapper">
+                                <input type="color" id="accent-color-picker" oninput="updateRGBText('accent', this.value)">
+                                <input type="text" class="rgb-text" id="accent-color-rgb" placeholder="204, 0, 102" onchange="updateColorPicker('accent', this.value)">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group-row">
+                        <div class="form-group">
+                            <label for="main-font">Font chữ Văn bản</label>
+                            <select id="main-font">
+                                <option value="default">Computer Modern (Mặc định)</option>
+                                <option value="opensans">Open Sans VN (Hiện đại, bo tròn)</option>
+                                <option value="notosans">Noto Sans VN (Tinh tế, chuẩn quốc tế)</option>
+                                <option value="tgpagella">Palatino / TeX Gyre Pagella (Sang trọng, học thuật)</option>
+                                <option value="tgtermes">Times New Roman / TeX Gyre Termes (Cơ bản, chính quy)</option>
+                                <option value="tgschola">Schoolbook / TeX Gyre Schola (Rõ ràng, giáo khoa)</option>
+                                <option value="tgheros">Helvetica / TeX Gyre Heros (Không chân mạnh mẽ)</option>
+                                <option value="arev">Arev Sans VN (Kỹ thuật hiện đại)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="math-font">Font chữ Toán</label>
+                            <select id="math-font">
+                                <option value="default">Computer Modern (Mặc định)</option>
+                                <option value="eulervm">Euler VM (Chữ viết tay nghệ thuật)</option>
+                                <option value="mathpazo">Palatino (Rộng rãi, dễ đọc)</option>
+                                <option value="mathptmx">Times (Nhã nhặn, truyền thống)</option>
+                                <option value="fourier">Fourier / Utopia (Đậm đà, sắc nét)</option>
+                                <option value="charter">Charter (Mượt mà, thanh lịch)</option>
+                                <option value="arev">Arev (Không chân Sans-Serif hiện đại)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="math-color">Màu công thức Toán</label>
+                        <select id="math-color" onchange="toggleCustomMathColor(this.value)">
+                            <option value="none">Màu đen mặc định</option>
+                            <option value="myprimary">Trùng với Màu Chủ Đạo</option>
+                            <option value="myaccent">Trùng với Màu Nhấn</option>
+                            <option value="custom">Màu RGB Tự chọn</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="custom-math-color-group" style="display: none;">
+                        <label for="math-color-rgb">Mã màu công thức (R, G, B)</label>
+                        <input type="text" id="math-color-rgb" placeholder="Ví dụ: 99, 102, 241">
+                    </div>
+                </div>
+
+                <!-- TAB 2: Layout & Decoration -->
+                <div class="config-tab-content" id="config-tab-content-layout">
+                    <div class="form-group-row">
+                        <div class="form-group">
+                            <label for="page-header-style">Bố cục Header (Đầu trang)</label>
+                            <select id="page-header-style">
+                                <option value="none">Trống (Mặc định)</option>
+                                <option value="hoang-decor">Khung Trang Trí Đa Sắc (Hoàng Decor)</option>
+                                <option value="minimal">Thanh ngang tối giản</option>
+                                <option value="accent-bar">Đường kẻ dày màu Nhấn (Accent Bar)</option>
+                                <option value="double-line">Đường đôi thanh lịch (Double Line)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="page-footer-style">Bố cục Footer (Cuối trang)</label>
+                            <select id="page-footer-style">
+                                <option value="none">Trống (Mặc định)</option>
+                                <option value="hoang-decor">Khung Trang Trí Đa Sắc (Hoàng Decor)</option>
+                                <option value="minimal">Thanh ngang tối giản</option>
+                                <option value="accent-bar">Đường kẻ dày & Số trang dạng thẻ (Accent Bar)</option>
+                                <option value="double-line">Đường đôi thanh lịch (Double Line)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="global-font-size">Cỡ chữ toàn cục (Global Font Size)</label>
+                        <select id="global-font-size">
+                            <option value="12pt">12pt (Mặc định)</option>
+                            <option value="11pt">11pt</option>
+                            <option value="10pt">10pt</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="header-banner-text">Tiêu đề Banner Đầu trang (Header)</label>
+                        <input type="text" id="header-banner-text" placeholder="Ví dụ: Kiểm Tra Giữa Học Kỳ I THPT 2026">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="footer-copyright-text">Dòng bản quyền Cuối trang (Footer)</label>
+                        <input type="text" id="footer-copyright-text" placeholder="Ví dụ: © 2026 Bản quyền thuộc về tác giả. All rights reserved.">
+                    </div>
+
+                    <div class="form-group-row">
+                        <div class="form-group">
+                            <label for="watermark-text">Văn bản In Chìm (Watermark)</label>
+                            <input type="text" id="watermark-text" placeholder="Ví dụ: LỚP TOÁN THẦY HOÀNG">
+                        </div>
+                        <div class="form-group">
+                            <label for="watermark-opacity">Độ mờ In Chìm (0.01 - 0.2)</label>
+                            <input type="number" id="watermark-opacity" step="0.01" min="0.01" max="0.5" placeholder="Mặc định: 0.06">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0;">
+                        <input type="checkbox" id="hide-id" style="width: auto; margin: 0; cursor: pointer;">
+                        <label for="hide-id" style="margin: 0; cursor: pointer; font-weight: normal; font-size: 0.9rem;">
+                            Ẩn nguồn/ID câu hỏi ở đầu câu (Ví dụ: ẩn "(THPT Lê Thánh Tông HCM 2026)")
+                        </label>
+                    </div>
+
+                    <!-- Two Column Switch -->
+                    <div class="switch-container">
+                        <span>Chia đề thi làm 2 cột (Đề thi)</span>
+                        <label class="switch">
+                            <input type="checkbox" id="two-columns">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- TAB 3: Symbols & Labels -->
+                <div class="config-tab-content" id="config-tab-content-symbols">
+                    <div class="form-group-row">
+                        <div class="form-group">
+                            <label for="q-symbol">Symbol Câu Hỏi <span id="q-symbol-preview" class="symbol-preview-icon"></span></label>
+                            <div class="input-group-with-btn">
+                                <input type="text" id="q-symbol" placeholder="Vd: \faPen, \faEdit" oninput="updateSymbolPreview('q', this.value)">
+                                <button class="btn" style="height:42px;" onclick="openIconPicker('q')">Chọn</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="b-symbol">Symbol Bài Tự Luận <span id="b-symbol-preview" class="symbol-preview-icon"></span></label>
+                            <div class="input-group-with-btn">
+                                <input type="text" id="b-symbol" placeholder="Vd: \faBook" oninput="updateSymbolPreview('b', this.value)">
+                                <button class="btn" style="height:42px;" onclick="openIconPicker('b')">Chọn</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group-row">
+                        <div class="form-group">
+                            <label for="sol-symbol">Symbol Lời Giải <span id="sol-symbol-preview" class="symbol-preview-icon"></span></label>
+                            <div class="input-group-with-btn">
+                                <input type="text" id="sol-symbol" placeholder="Vd: \faLightbulb" oninput="updateSymbolPreview('sol', this.value)">
+                                <button class="btn" style="height:42px;" onclick="openIconPicker('sol')">Chọn</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="hand-symbol">Symbol Chốt Đáp Án <span id="hand-symbol-preview" class="symbol-preview-icon"></span></label>
+                            <div class="input-group-with-btn">
+                                <input type="text" id="hand-symbol" placeholder="Vd: \faHandPointRight" oninput="updateSymbolPreview('hand', this.value)">
+                                <button class="btn" style="height:42px;" onclick="openIconPicker('hand')">Chọn</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group-row">
+                        <div class="form-group">
+                            <label for="question-text">Nhãn Câu Hỏi</label>
+                            <input type="text" id="question-text" placeholder="Mặc định: Câu">
+                        </div>
+                        <div class="form-group">
+                            <label for="book-text">Nhãn Bài Tự Luận</label>
+                            <input type="text" id="book-text" placeholder="Mặc định: Bài tự luận">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="question-label-style">Kiểu nhãn Câu hỏi</label>
+                        <select id="question-label-style">
+                            <option value="standard">Chữ thường có màu chủ đạo (Mặc định)</option>
+                            <option value="boxed">Dạng hộp bo tròn nền màu chủ đạo (Chữ trắng)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- TAB 4: Question Formats -->
+                <div class="config-tab-content" id="config-tab-content-questions">
+                    <!-- Trắc nghiệm nhiều lựa chọn -->
+                    <div class="config-card">
+                        <div class="config-card-title">
+                            <i class="fa-solid fa-list-ol"></i> Trắc Nghiệm Nhiều Lựa Chọn Layout
+                        </div>
+                        <div class="form-group-row">
+                            <div class="form-group">
+                                <label for="parskip-choice">Khoảng cách phương án (mm)</label>
+                                <input type="text" id="parskip-choice" placeholder="Mặc định: 2mm">
+                            </div>
+                            <div class="form-group">
+                                <label for="ans-table-cols">Số cột bảng đáp án</label>
+                                <input type="number" id="ans-table-cols" min="1" max="20" placeholder="Mặc định: 10">
+                            </div>
+                        </div>
+
+                        <div class="switch-container">
+                            <span>Sử dụng khung lựa chọn đặc biệt</span>
+                            <label class="switch">
+                                <input type="checkbox" id="use-custom-shapes" onchange="toggleShapeInputs(this.checked)">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div id="shape-options-block">
+                            <div class="form-group-row">
+                                <div class="form-group">
+                                    <label for="correct-shape">Khung Chốt Đáp Án Đúng</label>
+                                    <select id="correct-shape">
+                                        <option value="rectangle">Nền màu nhạt, viền Accent (Mặc định)</option>
+                                        <option value="circle">Tròn nền nhạt, viền Accent</option>
+                                        <option value="yellow-circle">Tròn đặc màu vàng</option>
+                                        <option value="circle-white">Tròn nền trắng, viền Accent</option>
+                                        <option value="boxed-white">Hộp nền trắng, viền Accent</option>
+                                        <option value="accent-box">Hộp đặc màu Accent (Chữ trắng)</option>
+                                        <option value="accent-circle">Tròn đặc màu Accent (Chữ trắng)</option>
+                                        <option value="underlined">Gạch chân màu Accent</option>
+                                        <option value="none">Chữ đậm màu Accent trơn (Không viền)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="incorrect-shape">Khung Phương Án Lựa Chọn</label>
+                                    <select id="incorrect-shape">
+                                        <option value="circle">Khoanh tròn viền mảnh màu Primary</option>
+                                        <option value="yellow-circle">Tròn đặc màu vàng</option>
+                                        <option value="circle-white">Tròn nền trắng, viền Primary</option>
+                                        <option value="boxed-white">Hộp nền trắng, viền Primary</option>
+                                        <option value="underlined">Gạch chân màu Primary</option>
+                                        <option value="none">Chữ đứng có dấu chấm (A.)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cấu hình Đúng/Sai -->
+                    <div class="config-card">
+                        <div class="config-card-title">
+                            <i class="fa-solid fa-list-check"></i> Trắc Nghiệm Đúng / Sai Layout
+                        </div>
+                        <div class="form-group-row">
+                            <div class="form-group">
+                                <label for="tf-layout">Bố cục biểu bảng (kindTF)</label>
+                                <select id="tf-layout">
+                                    <option value="t">Tự động 1 hoặc 2 bảng (Mặc định)</option>
+                                    <option value="0">Không dùng bảng (Chuẩn 2025)</option>
+                                    <option value="1t">Buộc hiển thị 1 bảng duy nhất</option>
+                                    <option value="2t">Buộc hiển thị 2 bảng chia đôi</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="tf-header-text">Tiêu đề phát biểu</label>
+                                <input type="text" id="tf-header-text" placeholder="Mặc định: Phát biểu">
+                            </div>
+                        </div>
+
+                        <div class="form-group-row">
+                            <div class="form-group">
+                                <label for="tf-dapan">Ký hiệu phương án (dapanTF)</label>
+                                <select id="tf-dapan">
+                                    <option value="a">a) b) c) d) (Mặc định)</option>
+                                    <option value="1">1) 2) 3) 4)</option>
+                                    <option value="A">A. B. C. D.</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="tf-sep">Ký tự phân tách (sepTF)</label>
+                                <input type="text" id="tf-sep" placeholder="Mặc định: )">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="correct-tf-shape">Khung Chốt Đáp Án Đúng (TF)</label>
+                            <select id="correct-tf-shape">
+                                <option value="rectangle">Hộp viền Accent nền nhạt (Mặc định)</option>
+                                <option value="circle">Tròn viền Accent nền nhạt</option>
+                                <option value="yellow-circle">Tròn đặc màu vàng</option>
+                                <option value="circle-white">Tròn viền Accent nền trắng</option>
+                                <option value="boxed-white">Hộp viền Accent nền trắng</option>
+                                <option value="accent-box">Hộp đặc màu Accent (Chữ trắng)</option>
+                                <option value="accent-circle">Tròn đặc màu Accent (Chữ trắng)</option>
+                                <option value="underlined">Gạch chân màu Accent</option>
+                                <option value="none">Chữ đậm màu Accent trơn (Không viền)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group-row" style="margin-top: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
+                            <div class="switch-container" style="flex: 1 1 200px; margin: 0; padding: 0.5rem 1rem;">
+                                <span>In đậm tiêu đề cột</span>
+                                <label class="switch">
+                                    <input type="checkbox" id="tf-bold-header">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="switch-container" style="flex: 1 1 200px; margin: 0; padding: 0.5rem 1rem;">
+                                <span>Viết tắt Đ/S</span>
+                                <label class="switch">
+                                    <input type="checkbox" id="tf-abbreviation">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group-row" style="margin-top: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
+                            <div class="switch-container" style="flex: 1 1 200px; margin: 0; padding: 0.5rem 1rem;">
+                                <span>Tự thêm Đ/S vào lời giải</span>
+                                <label class="switch">
+                                    <input type="checkbox" id="tf-addanswers">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="switch-container" style="flex: 1 1 200px; margin: 0; padding: 0.5rem 1rem;">
+                                <span>Tự thêm đề bài vào lời giải</span>
+                                <label class="switch">
+                                    <input type="checkbox" id="tf-addquestions">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="switch-container" style="margin-top: 0.5rem; padding: 0.5rem 1rem;">
+                            <span>Tránh tràn trang Đúng/Sai (inputansbox)</span>
+                            <label class="switch">
+                                <input type="checkbox" id="prevent-overflow-ansbox">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Cấu hình Trả lời ngắn -->
+                    <div class="config-card">
+                        <div class="config-card-title">
+                            <i class="fa-solid fa-pen-clip"></i> Câu Trả Lời Ngắn Layout
+                        </div>
+                        <div class="form-group-row">
+                            <div class="form-group">
+                                <label for="sa-layout">Bố cục ô điền (kindSA)</label>
+                                <select id="sa-layout">
+                                    <option value="oly">4 Ô ly tách ký tự (Mặc định)</option>
+                                    <option value="0">Không có chỗ điền (Chuẩn 2025)</option>
+                                    <option value="...">Dòng chấm lửng</option>
+                                    <option value="4">Ô trống rộng 4cm</option>
+                                    <option value="3">Ô trống rộng 3cm</option>
+                                    <option value="5">Ô trống rộng 5cm</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="sa-prefix">Tiêu đề trước ô điền</label>
+                                <input type="text" id="sa-prefix" placeholder="Mặc định: Đáp số:">
+                            </div>
+                        </div>
+
+                        <div class="form-group-row">
+                            <div class="form-group">
+                                <label for="sa-width">Độ rộng ô điền (cm)</label>
+                                <input type="number" id="sa-width" min="1" max="15" step="0.5" placeholder="Mặc định: 4">
+                            </div>
+                            <div class="form-group">
+                                <label for="sa-height">Chiều cao ô điền (cm)</label>
+                                <input type="number" id="sa-height" min="0.5" max="3" step="0.1" placeholder="Mặc định: 0.9">
+                            </div>
+                        </div>
+
+                        <div class="form-group-row">
+                            <div class="form-group">
+                                <label for="sa-dapan">Ký hiệu phương án (dapanSA)</label>
+                                <select id="sa-dapan">
+                                    <option value="a">a) b) c) d) (Mặc định)</option>
+                                    <option value="1">1) 2) 3) 4)</option>
+                                    <option value="A">A. B. C. D.</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="correct-sa-shape">Khung Chốt Đáp Án Đúng (SA)</label>
+                            <select id="correct-sa-shape">
+                                <option value="rectangle">Hộp viền Accent nền nhạt (Mặc định)</option>
+                                <option value="circle">Tròn viền Accent nền nhạt</option>
+                                <option value="yellow-circle">Tròn đặc màu vàng</option>
+                                <option value="circle-white">Tròn viền Accent nền trắng</option>
+                                <option value="boxed-white">Hộp viền Accent nền trắng</option>
+                                <option value="accent-box">Hộp đặc màu Accent (Chữ trắng)</option>
+                                <option value="accent-circle">Tròn đặc màu Accent (Chữ trắng)</option>
+                                <option value="underlined">Gạch chân màu Accent</option>
+                                <option value="none">Chữ đậm màu Accent trơn (Không viền)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="switch-container" style="margin-top: 0.5rem; padding: 0.5rem 1rem;">
+                            <span>Tự động ngắt dòng bảng đáp án (inputanstab)</span>
+                            <label class="switch">
+                                <input type="checkbox" id="auto-wrap-anstab">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Save Button -->
+                <button class="btn btn-primary btn-block" style="margin-top: 1.5rem;" onclick="saveStyle()">
+                    <i class="fa-solid fa-floppy-disk"></i> Lưu cấu hình theme
+                </button>
+            </div>
+        </div>
+
+        <!-- Right Panel: PDF Compiler & Preview -->
+        <div class="panel right-panel">
+            <div class="panel-header">
+                <h2><i class="fa-solid fa-microchip"></i> Điều Khiển & Biên Dịch Đề Thi</h2>
+                <div style="display: flex; gap: 0.5rem;">
+                    <span id="active-theme-badge" class="btn btn-outline btn-sm" style="cursor: default; pointer-events: none;">
+                        Theme: classic
+                    </span>
+                </div>
+            </div>
+            <div class="panel-body">
+                <!-- Action Controls -->
+                <div class="action-bar" style="flex-wrap: wrap;">
+                    <button class="btn btn-primary" onclick="runParserAction('inject_single')" id="inject-single-btn" title="Đổi style cho tệp TeX đang chọn">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Đổi Style Tệp
+                    </button>
+                    <button class="btn btn-outline" onclick="runParserAction('inject_all')" id="inject-all-btn" title="Đổi style cho tất cả tệp TeX trong thư mục nguồn">
+                        <i class="fa-solid fa-folder-open"></i> Đổi Style Toàn bộ
+                    </button>
+                    <button class="btn btn-success" onclick="compileAction('single')" id="compile-single-btn" title="Biên dịch tệp TeX đang chọn trong thư mục đầu ra">
+                        <i class="fa-solid fa-gears"></i> Biên dịch Tệp
+                    </button>
+                    <button class="btn btn-outline" onclick="compileAction('all')" id="compile-all-btn" title="Biên dịch tất cả tệp TeX trong thư mục đầu ra">
+                        <i class="fa-solid fa-circle-play"></i> Biên dịch Toàn bộ
+                    </button>
+                </div>
+                
+                <div class="action-bar legacy-action-bar" style="margin-top: -0.75rem; margin-bottom: 1.5rem; background: rgba(15, 23, 42, 0.3); border-style: dashed; flex-wrap: wrap; align-items: center;">
+                    <span style="font-size: 0.8rem; color: var(--text-muted); display: inline-flex; align-items: center; gap: 0.5rem; margin-right: auto;">
+                        <i class="fa-solid fa-circle-info"></i> Quy trình OCR mặc định:
+                    </span>
+                    <button class="btn btn-outline btn-sm" onclick="parseOlmocr()" id="parse-btn" title="Tạo các file đề từ file olmocr.md mặc định">
+                        <i class="fa-solid fa-file-code"></i> Tạo file TeX (OCR)
+                    </button>
+                    <button class="btn btn-outline btn-sm" onclick="compilePDF('all')" id="compile-btn" title="Biên dịch bộ đề mặc định (de-thi, de-va-loigiai, dap-an)">
+                        <i class="fa-solid fa-print"></i> Biên dịch Bộ đề OCR
+                    </button>
+                </div>
+
+                <!-- Live Log Window -->
+                <label>Trạng thái & Nhật ký biên dịch (pdflatex logs)</label>
+                <div class="log-container" id="log-window">Sẵn sàng. Nhấn một hành động để bắt đầu biên dịch...</div>
+
+                <!-- Preview Tabs -->
+                <div class="tabs">
+                    <button class="tab-btn active" id="tab-de-thi" onclick="switchPreviewTab('de-thi')">
+                        <i class="fa-solid fa-pen-clip"></i> Đề thi
+                    </button>
+                    <button class="tab-btn" id="tab-de-va-loigiai" onclick="switchPreviewTab('de-va-loigiai')">
+                        <i class="fa-solid fa-book-open-reader"></i> Lời giải chi tiết
+                    </button>
+                    <button class="tab-btn" id="tab-dap-an" onclick="switchPreviewTab('dap-an')">
+                        <i class="fa-solid fa-table"></i> Bảng đáp án
+                    </button>
+                </div>
+
+                <!-- Page Preview Gallery -->
+                <div class="preview-gallery" id="preview-gallery-container">
+                    <div class="preview-placeholder">
+                        <i class="fa-regular fa-image"></i>
+                        <p>Chưa có ảnh xem trước. Hãy biên dịch tệp để hiển thị hình ảnh xem trước tại đây.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast-notification">
+        <i class="fa-solid fa-info-circle" id="toast-icon"></i>
+        <span id="toast-message">Thông báo</span>
+    </div>
+
+    <script>
+        let allStyles = {};
+        let currentStyleName = "";
+        let currentActiveTab = "de-thi";
+
+        // Convert Hex to RGB string 'R, G, B'
+        function hexToRgb(hex) {
+            let c;
+            if(/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)){
+                c= hex.substring(1).split('');
+                if(c.length== 3){
+                    c= [c[0], c[0], c[1], c[1], c[2], c[2]];
+                }
+                c= '0x' + c.join('');
+                return [(c>>16)&255, (c>>8)&255, c&255].join(', ');
+            }
+            return '0, 0, 0';
+        }
+
+        // Convert RGB string 'R, G, B' to Hex '#RRGGBB'
+        function rgbToHex(rgbStr) {
+            try {
+                let parts = rgbStr.split(',').map(x => parseInt(x.trim()));
+                if(parts.length === 3) {
+                    return "#" + parts.map(x => {
+                        let hex = x.toString(16);
+                        return hex.length === 1 ? "0" + hex : hex;
+                    }).join("");
+                }
+            } catch(e) {}
+            return "#000000";
+        }
+
+        // Helper: Show Toast Notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast-notification');
+            const icon = document.getElementById('toast-icon');
+            const msgSpan = document.getElementById('toast-message');
+
+            toast.className = `toast toast-${type} show`;
+            msgSpan.innerText = message;
+
+            if (type === 'success') {
+                icon.className = 'fa-solid fa-circle-check';
+                icon.style.color = '#10b981';
+            } else if (type === 'error') {
+                icon.className = 'fa-solid fa-circle-xmark';
+                icon.style.color = '#ef4444';
+            } else {
+                icon.className = 'fa-solid fa-circle-info';
+                icon.style.color = '#6366f1';
+            }
+
+            setTimeout(() => {
+                toast.className = 'toast';
+            }, 3500);
+        }
+
+        // UI Event handlers
+        function updateRGBText(type, hexVal) {
+            document.getElementById(`${type}-color-rgb`).value = hexToRgb(hexVal);
+        }
+
+        function updateColorPicker(type, rgbVal) {
+            document.getElementById(`${type}-color-picker`).value = rgbToHex(rgbVal);
+        }
+
+        function toggleShapeInputs(checked) {
+            const block = document.getElementById('shape-options-block');
+            block.style.opacity = checked ? '1' : '0.5';
+            block.style.pointerEvents = checked ? 'auto' : 'none';
+        }
+
+        function toggleCustomMathColor(val) {
+            const group = document.getElementById('custom-math-color-group');
+            group.style.display = val === 'custom' ? 'block' : 'none';
+        }
+
+        // Map LaTeX FontAwesome command to real FontAwesome class name
+        function getFAIconClass(latexSymbol) {
+            if (!latexSymbol) return "";
+            const name = latexSymbol.trim().replace(/^\\+/, ''); // remove leading backslashes
+            
+            const mapping = {
+                'faQuestionCircle': 'fa-solid fa-circle-question',
+                'faBook': 'fa-solid fa-book',
+                'faEdit': 'fa-solid fa-pen-to-square',
+                'faPen': 'fa-solid fa-pen',
+                'faLightbulb': 'fa-solid fa-lightbulb',
+                'faHandPointRight': 'fa-solid fa-hand-point-right',
+                'faArrowRight': 'fa-solid fa-arrow-right',
+                'faGraduationCap': 'fa-solid fa-graduation-cap',
+                'faKey': 'fa-solid fa-key',
+                'faCheck': 'fa-solid fa-check',
+                'faCommentDots': 'fa-solid fa-comment-dots',
+                'faQuestion': 'fa-solid fa-question',
+                'faFile': 'fa-solid fa-file',
+                'faStar': 'fa-solid fa-star',
+                'faAward': 'fa-solid fa-award'
+            };
+            
+            if (mapping[name]) {
+                return mapping[name];
+            }
+            
+            let kebab = name.replace(/([A-Z])/g, '-$1').toLowerCase();
+            if (kebab.startsWith('-')) kebab = kebab.substring(1);
+            if (!kebab.startsWith('fa-')) {
+                kebab = 'fa-' + kebab;
+            }
+            return `fa-solid ${kebab}`;
+        }
+
+        function updateSymbolPreview(type, val) {
+            const previewEl = document.getElementById(`${type}-symbol-preview`);
+            if (!previewEl) return;
+            
+            const iconClass = getFAIconClass(val);
+            if (iconClass && val.trim().length > 0) {
+                previewEl.innerHTML = `<i class="${iconClass}"></i>`;
+                previewEl.style.display = 'inline-flex';
+            } else {
+                previewEl.innerHTML = '';
+                previewEl.style.display = 'none';
+            }
+        }
+
+        let allFaIcons = [];
+        let activeSymbolTarget = null;
+
+        // Fetch all icons from backend
+        async function fetchIconsList() {
+            if (allFaIcons.length > 0) return;
+            try {
+                const response = await fetch('/api/icons');
+                allFaIcons = await response.json();
+            } catch (err) {
+                console.error("Error fetching icons list:", err);
+            }
+        }
+
+        // Open Icon Picker Modal
+        async function openIconPicker(target) {
+            activeSymbolTarget = target;
+            await fetchIconsList();
+            
+            const modal = document.getElementById('icon-picker-modal');
+            const searchInput = document.getElementById('icon-search-input');
+            searchInput.value = '';
+            
+            renderIconsGrid(allFaIcons);
+            modal.classList.add('show');
+            searchInput.focus();
+        }
+
+        // Close Icon Picker Modal
+        function closeIconPicker() {
+            const modal = document.getElementById('icon-picker-modal');
+            modal.classList.remove('show');
+            activeSymbolTarget = null;
+        }
+
+        // Render Grid
+        function renderIconsGrid(iconsList) {
+            const container = document.getElementById('icon-grid-container');
+            container.innerHTML = '';
+            
+            if (iconsList.length === 0) {
+                container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 2rem;">Không tìm thấy biểu tượng nào.</div>';
+                return;
+            }
+
+            iconsList.forEach(latexSymbol => {
+                const iconClass = getFAIconClass(latexSymbol);
+                const item = document.createElement('div');
+                item.className = 'icon-item';
+                item.onclick = () => selectIcon(latexSymbol);
+                
+                item.innerHTML = `
+                    <i class="${iconClass}"></i>
+                    <span>${latexSymbol}</span>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        // Filter Icons by search input
+        function filterIcons() {
+            const query = document.getElementById('icon-search-input').value.toLowerCase().trim();
+            if (!query) {
+                renderIconsGrid(allFaIcons);
+                return;
+            }
+            
+            const filtered = allFaIcons.filter(latexSymbol => {
+                const cleanName = latexSymbol.replace(/^\\fa/, '').toLowerCase();
+                return latexSymbol.toLowerCase().includes(query) || cleanName.includes(query);
+            });
+            
+            renderIconsGrid(filtered);
+        }
+
+        // Select Icon
+        function selectIcon(latexSymbol) {
+            if (activeSymbolTarget) {
+                const inputId = `${activeSymbolTarget}-symbol`;
+                const inputEl = document.getElementById(inputId);
+                if (inputEl) {
+                    inputEl.value = latexSymbol;
+                    updateSymbolPreview(activeSymbolTarget, latexSymbol);
+                }
+            }
+            closeIconPicker();
+        }
+
+        // Fetch all styles from backend
+        async function fetchStyles() {
+            try {
+                const response = await fetch('/api/styles');
+                allStyles = await response.json();
+                
+                const selector = document.getElementById('theme-selector');
+                selector.innerHTML = '';
+                
+                Object.keys(allStyles).forEach(name => {
+                    const option = document.createElement('option');
+                    option.value = name;
+                    option.innerText = name;
+                    selector.appendChild(option);
+                });
+
+                if (currentStyleName === "" || !allStyles[currentStyleName]) {
+                    currentStyleName = Object.keys(allStyles)[0] || "";
+                }
+                
+                selector.value = currentStyleName;
+                loadTheme(currentStyleName);
+            } catch (err) {
+                console.error("Error fetching styles:", err);
+                showToast("Không thể kết nối tới backend API", "error");
+            }
+        }
+
+        // Populate form fields with selected theme data
+        function loadTheme(name) {
+            currentStyleName = name;
+            const theme = allStyles[name];
+            if (!theme) return;
+
+            document.getElementById('theme-name').value = name;
+            document.getElementById('primary-color-rgb').value = theme.primary;
+            document.getElementById('primary-color-picker').value = rgbToHex(theme.primary);
+            document.getElementById('accent-color-rgb').value = theme.accent;
+            document.getElementById('accent-color-picker').value = rgbToHex(theme.accent);
+
+            const useCustom = theme.use_custom_shapes !== false;
+            document.getElementById('use-custom-shapes').checked = useCustom;
+            toggleShapeInputs(useCustom);
+
+            document.getElementById('correct-shape').value = theme.correct_choice_shape || 'rectangle';
+            document.getElementById('incorrect-shape').value = theme.incorrect_choice_shape || 'circle';
+
+            document.getElementById('q-symbol').value = theme.question_symbol || '';
+            document.getElementById('b-symbol').value = theme.book_symbol || '';
+            document.getElementById('sol-symbol').value = theme.solution_title_symbol || '';
+            document.getElementById('hand-symbol').value = theme.hand_pointing_symbol || '';
+
+            // Math Options
+            document.getElementById('math-font').value = theme.math_font || 'default';
+            
+            const mathCol = theme.color_formulas || 'none';
+            if (mathCol === 'none' || mathCol === 'myprimary' || mathCol === 'myaccent') {
+                document.getElementById('math-color').value = mathCol;
+                document.getElementById('math-color-rgb').value = '';
+                toggleCustomMathColor(mathCol);
+            } else {
+                document.getElementById('math-color').value = 'custom';
+                document.getElementById('math-color-rgb').value = mathCol;
+                toggleCustomMathColor('custom');
+            }
+
+            // Ex-test Options
+            document.getElementById('question-text').value = theme.question_text || 'Câu';
+            document.getElementById('book-text').value = theme.book_text || 'Bài tự luận';
+            document.getElementById('parskip-choice').value = theme.parskip_choice || '2mm';
+            document.getElementById('ans-table-cols').value = theme.ans_table_cols || 10;
+
+            // Font & Bố cục Trang
+            document.getElementById('main-font').value = theme.main_font || 'default';
+            document.getElementById('question-label-style').value = theme.question_label_style || 'standard';
+            document.getElementById('page-header-style').value = theme.page_header_style || 'none';
+            document.getElementById('page-footer-style').value = theme.page_footer_style || 'none';
+            document.getElementById('header-banner-text').value = theme.header_banner_text || '';
+            document.getElementById('footer-copyright-text').value = theme.footer_copyright_text || '';
+            document.getElementById('watermark-text').value = theme.watermark_text || '';
+            document.getElementById('watermark-opacity').value = theme.watermark_opacity || '0.06';
+            document.getElementById('hide-id').checked = theme.hide_id === true;
+            document.getElementById('two-columns').checked = theme.two_columns === true;
+            document.getElementById('global-font-size').value = theme.global_font_size || '12pt';
+
+            document.getElementById('tf-layout').value = theme.tf_layout || 't';
+            document.getElementById('tf-header-text').value = theme.tf_header_text || 'Phát biểu';
+            document.getElementById('tf-bold-header').checked = theme.tf_bold_header !== false;
+            document.getElementById('tf-abbreviation').checked = theme.tf_abbreviation === true;
+            document.getElementById('correct-tf-shape').value = theme.correct_tf_shape || 'rectangle';
+            document.getElementById('tf-dapan').value = theme.tf_dapan || 'a';
+            document.getElementById('tf-sep').value = theme.tf_sep || ')';
+            document.getElementById('tf-addanswers').checked = theme.tf_addanswers !== false;
+            document.getElementById('tf-addquestions').checked = theme.tf_addquestions === true;
+            document.getElementById('prevent-overflow-ansbox').checked = theme.prevent_overflow_ansbox !== false;
+
+            document.getElementById('sa-layout').value = theme.sa_layout || 'oly';
+            document.getElementById('sa-prefix').value = theme.sa_prefix || 'Đáp số:';
+            document.getElementById('sa-width').value = theme.sa_width || 4;
+            document.getElementById('correct-sa-shape').value = theme.correct_sa_shape || 'rectangle';
+            document.getElementById('sa-dapan').value = theme.sa_dapan || 'a';
+            document.getElementById('sa-height').value = theme.sa_height || 0.9;
+            document.getElementById('auto-wrap-anstab').checked = theme.auto_wrap_anstab !== false;
+
+            document.getElementById('active-theme-badge').innerText = `Theme: ${name}`;
+            
+            updateSymbolPreview('q', theme.question_symbol || '');
+            updateSymbolPreview('b', theme.book_symbol || '');
+            updateSymbolPreview('sol', theme.solution_title_symbol || '');
+            updateSymbolPreview('hand', theme.hand_pointing_symbol || '');
+
+            updatePreviewGallery();
+        }
+
+        // Save currently edited style
+        async function saveStyle() {
+            const name = document.getElementById('theme-name').value.trim();
+            if (!name) {
+                showToast("Vui lòng nhập tên theme!", "error");
+                return;
+            }
+
+            const isCustom = document.getElementById('use-custom-shapes').checked;
+            const mathColType = document.getElementById('math-color').value;
+            let mathColVal = 'none';
+
+            if (mathColType === 'custom') {
+                mathColVal = document.getElementById('math-color-rgb').value.trim();
+                if (!mathColVal) {
+                    showToast("Vui lòng nhập mã màu RGB cho công thức!", "error");
+                    return;
+                }
+            } else {
+                mathColVal = mathColType;
+            }
+
+            const themeData = {
+                primary: document.getElementById('primary-color-rgb').value,
+                accent: document.getElementById('accent-color-rgb').value,
+                use_custom_shapes: isCustom,
+                correct_choice_shape: document.getElementById('correct-shape').value,
+                incorrect_choice_shape: document.getElementById('incorrect-shape').value,
+                question_symbol: document.getElementById('q-symbol').value,
+                book_symbol: document.getElementById('b-symbol').value,
+                solution_title_symbol: document.getElementById('sol-symbol').value,
+                hand_pointing_symbol: document.getElementById('hand-symbol').value,
+                math_font: document.getElementById('math-font').value,
+                color_formulas: mathColVal,
+
+                // New fields from HuongDanExTest
+                question_text: document.getElementById('question-text').value.trim() || 'Câu',
+                book_text: document.getElementById('book-text').value.trim() || 'Bài tự luận',
+                parskip_choice: document.getElementById('parskip-choice').value.trim() || '2mm',
+                ans_table_cols: parseInt(document.getElementById('ans-table-cols').value) || 10,
+                
+                // Font & Bố cục Trang
+                main_font: document.getElementById('main-font').value,
+                question_label_style: document.getElementById('question-label-style').value,
+                page_header_style: document.getElementById('page-header-style').value,
+                page_footer_style: document.getElementById('page-footer-style').value,
+                header_banner_text: document.getElementById('header-banner-text').value.trim(),
+                footer_copyright_text: document.getElementById('footer-copyright-text').value.trim(),
+                watermark_text: document.getElementById('watermark-text').value.trim(),
+                watermark_opacity: document.getElementById('watermark-opacity').value.trim() || '0.06',
+                hide_id: document.getElementById('hide-id').checked,
+                two_columns: document.getElementById('two-columns').checked,
+                global_font_size: document.getElementById('global-font-size').value,
+
+                tf_layout: document.getElementById('tf-layout').value,
+                tf_header_text: document.getElementById('tf-header-text').value.trim() || 'Phát biểu',
+                tf_bold_header: document.getElementById('tf-bold-header').checked,
+                tf_abbreviation: document.getElementById('tf-abbreviation').checked,
+                correct_tf_shape: document.getElementById('correct-tf-shape').value,
+                tf_dapan: document.getElementById('tf-dapan').value,
+                tf_sep: document.getElementById('tf-sep').value.trim() || ')',
+                tf_addanswers: document.getElementById('tf-addanswers').checked,
+                tf_addquestions: document.getElementById('tf-addquestions').checked,
+                prevent_overflow_ansbox: document.getElementById('prevent-overflow-ansbox').checked,
+                
+                sa_layout: document.getElementById('sa-layout').value,
+                sa_prefix: document.getElementById('sa-prefix').value.trim() || 'Đáp số:',
+                sa_width: parseFloat(document.getElementById('sa-width').value) || 4,
+                correct_sa_shape: document.getElementById('correct-sa-shape').value,
+                sa_dapan: document.getElementById('sa-dapan').value,
+                sa_height: parseFloat(document.getElementById('sa-height').value) || 0.9,
+                auto_wrap_anstab: document.getElementById('auto-wrap-anstab').checked
+            };
+
+            try {
+                const response = await fetch('/api/save_style', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, data: themeData })
+                });
+
+                if (response.ok) {
+                    currentStyleName = name;
+                    showToast(`Đã lưu thành công theme "${name}"!`);
+                    await fetchStyles();
+                } else {
+                    showToast("Lỗi khi lưu theme!", "error");
+                }
+            } catch (err) {
+                console.error(err);
+                showToast("Lỗi kết nối khi lưu theme", "error");
+            }
+        }
+
+        function createNewTheme() {
+            const name = prompt("Nhập tên cho theme mới:");
+            if (!name) return;
+            const cleanName = name.toLowerCase().replace(/[^a-z0-9_-]/g, '');
+            if (!cleanName) {
+                alert("Tên không hợp lệ!");
+                return;
+            }
+
+            allStyles[cleanName] = {
+                primary: '0, 102, 204',
+                accent: '204, 0, 102',
+                use_custom_shapes: true,
+                correct_choice_shape: 'rectangle',
+                incorrect_choice_shape: 'circle',
+                question_symbol: '\\faPen',
+                book_symbol: '\\faBook',
+                solution_title_symbol: '\\faLightbulb',
+                hand_pointing_symbol: '\\faHandPointRight',
+                math_font: 'default',
+                color_formulas: 'none',
+                
+                question_text: 'Câu',
+                book_text: 'Bài tự luận',
+                parskip_choice: '2mm',
+                ans_table_cols: 10,
+
+                main_font: 'default',
+                question_label_style: 'standard',
+                page_header_style: 'none',
+                page_footer_style: 'none',
+                header_banner_text: 'KIỂM TRA GIỮA HỌC KỲ I - THPT 2026',
+                footer_copyright_text: '© 2026 Bản quyền thuộc về tác giả. All rights reserved.',
+                watermark_text: '',
+                watermark_opacity: '0.06',
+                hide_id: false,
+                two_columns: false,
+                global_font_size: '12pt',
+                
+                tf_layout: 't',
+                tf_header_text: 'Phát biểu',
+                tf_bold_header: true,
+                tf_abbreviation: false,
+                correct_tf_shape: 'rectangle',
+                tf_dapan: 'a',
+                tf_sep: ')',
+                tf_addanswers: true,
+                tf_addquestions: false,
+                prevent_overflow_ansbox: true,
+                
+                sa_layout: 'oly',
+                sa_prefix: 'Đáp số:',
+                sa_width: 4,
+                correct_sa_shape: 'rectangle',
+                sa_dapan: 'a',
+                sa_height: 0.9,
+                auto_wrap_anstab: true
+            };
+
+            currentStyleName = cleanName;
+            
+            // Re-render select option
+            const selector = document.getElementById('theme-selector');
+            const option = document.createElement('option');
+            option.value = cleanName;
+            option.innerText = cleanName;
+            selector.appendChild(option);
+            selector.value = cleanName;
+            
+            loadTheme(cleanName);
+            showToast(`Đã tạo theme mới "${cleanName}". Hãy lưu lại sau khi chỉnh sửa.`);
+        }
+
+        async function deleteCurrentTheme() {
+            if (Object.keys(allStyles).length <= 1) {
+                alert("Không thể xóa theme cuối cùng!");
+                return;
+            }
+            if (!confirm(`Bạn có chắc chắn muốn xóa theme "${currentStyleName}"?`)) return;
+
+            try {
+                const response = await fetch('/api/delete_style', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: currentStyleName })
+                });
+
+                if (response.ok) {
+                    showToast(`Đã xóa theme "${currentStyleName}"`);
+                    currentStyleName = "";
+                    await fetchStyles();
+                } else {
+                    showToast("Lỗi khi xóa theme!", "error");
+                }
+            } catch (err) {
+                console.error(err);
+                showToast("Lỗi kết nối khi xóa theme", "error");
+            }
+        }
+
+        // Call Parse OCR backend API
+        async function parseOlmocr() {
+            const btn = document.getElementById('parse-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang sinh TeX...';
+            btn.disabled = true;
+
+            const logWin = document.getElementById('log-window');
+            logWin.innerHTML = `[Hệ thống] Đang gọi parse_olmocr.py với theme "${currentStyleName}"...\n`;
+
+            try {
+                const response = await fetch('/api/run_parser', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ style_name: currentStyleName })
+                });
+
+                const result = await response.json();
+                logWin.innerHTML += result.output;
+                
+                if (result.success) {
+                    showToast("Đã sinh thành công các tệp .tex!");
+                } else {
+                    showToast("Sinh tệp .tex thất bại!", "error");
+                }
+            } catch (err) {
+                logWin.innerHTML += `[Lỗi] Kết nối thất bại: ${err}\n`;
+                showToast("Lỗi kết nối khi gọi parser", "error");
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // Call Compile LaTeX backend API
+        async function compilePDF(type) {
+            const btn = document.getElementById('compile-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang biên dịch...';
+            btn.disabled = true;
+
+            const logWin = document.getElementById('log-window');
+            const targetDoc = 'all';
+            logWin.innerHTML = `[Hệ thống] Bắt đầu biên dịch tệp: ${targetDoc}.tex...\n`;
+
+            try {
+                const response = await fetch('/api/compile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ doc_type: targetDoc })
+                });
+
+                const result = await response.json();
+                logWin.innerHTML += result.output;
+                
+                if (result.success) {
+                    showToast("Biên dịch PDF thành công!");
+                    await updatePreviewGallery();
+                } else {
+                    showToast("Biên dịch PDF thất bại!", "error");
+                }
+            } catch (err) {
+                logWin.innerHTML += `[Lỗi] Kết nối biên dịch thất bại: ${err}\n`;
+                showToast("Lỗi kết nối khi biên dịch", "error");
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // Handle tabs for PDF preview selection
+        function switchPreviewTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            currentActiveTab = tabName;
+            updatePreviewGallery();
+        }
+
+        // Handle tabs for left panel style settings selection
+        function switchConfigTab(tabName) {
+            document.querySelectorAll('.config-tab-content').forEach(el => {
+                el.style.display = 'none';
+            });
+            document.querySelectorAll('.config-tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            const activeContent = document.getElementById(`config-tab-content-${tabName}`);
+            if (activeContent) {
+                activeContent.style.display = 'block';
+            }
+            const activeBtn = document.getElementById(`config-tab-btn-${tabName}`);
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+            }
+        }
+
+        // Update preview images
+        async function updatePreviewGallery() {
+            const gallery = document.getElementById('preview-gallery-container');
+            gallery.innerHTML = '<div class="preview-placeholder"><i class="fa-solid fa-spinner fa-spin"></i><p>Đang tải ảnh xem trước...</p></div>';
+
+            let filePrefix = "";
+            const fileSelector = document.getElementById('file-selector');
+            if (fileSelector && fileSelector.value) {
+                filePrefix = fileSelector.value.replace(/\.[^/.]+$/, "");
+            }
+
+            let queryParam = `doc_type=${currentActiveTab}`;
+            if (filePrefix) {
+                queryParam = `file_prefix=${filePrefix}`;
+            }
+
+            try {
+                const response = await fetch(`/api/preview_images?${queryParam}`);
+                const data = await response.json();
+
+                if (data.images && data.images.length > 0) {
+                    gallery.innerHTML = '';
+                    data.images.forEach(imgUrl => {
+                        const img = document.createElement('img');
+                        img.src = imgUrl + '?t=' + new Date().getTime(); // Avoid caching
+                        img.className = 'preview-page';
+                        img.alt = `Xem trước trang`;
+                        gallery.appendChild(img);
+                    });
+                } else {
+                    const displayPrefix = filePrefix || currentActiveTab;
+                    gallery.innerHTML = `
+                        <div class="preview-placeholder">
+                            <i class="fa-regular fa-file-pdf"></i>
+                            <p>Chưa có ảnh xem trước cho "${displayPrefix}.pdf". Hãy nhấn "Biên dịch Tệp" để tạo tài liệu và xem trước.</p>
+                        </div>
+                    `;
+                }
+            } catch (err) {
+                gallery.innerHTML = `<div class="preview-placeholder"><i class="fa-solid fa-circle-exclamation" style="color: #ef4444"></i><p>Lỗi khi tải ảnh xem trước</p></div>`;
+            }
+        }
+
+        let selectedFilename = "";
+
+        // Fetch folder information
+        async function fetchFolderInfo() {
+            try {
+                const response = await fetch('/api/info');
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('input-dir-path').value = data.input_dir || '';
+                    document.getElementById('output-dir-path').value = data.output_dir || '';
+                    updateFileSelectorOptions(data.tex_files || []);
+                }
+            } catch (err) {
+                console.error("Error fetching folder info:", err);
+            }
+        }
+
+        function updateFileSelectorOptions(files) {
+            const selector = document.getElementById('file-selector');
+            selector.innerHTML = '<option value="">-- Chọn tệp TeX --</option>';
+            files.forEach(f => {
+                const option = document.createElement('option');
+                option.value = f;
+                option.innerText = f;
+                selector.appendChild(option);
+            });
+            if (selectedFilename && files.includes(selectedFilename)) {
+                selector.value = selectedFilename;
+            } else {
+                selectedFilename = "";
+            }
+        }
+
+        async function browseFolder(type) {
+            const inputId = type === 'input' ? 'input-dir-path' : 'output-dir-path';
+            const inputEl = document.getElementById(inputId);
+            const initialDir = inputEl ? inputEl.value.trim() : "";
+            
+            try {
+                const response = await fetch(`/api/browse_folder?initial_dir=${encodeURIComponent(initialDir)}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.directory) {
+                        inputEl.value = data.directory;
+                        showToast(`Đã chọn thư mục: ${data.directory}`);
+                        // Tự động áp dụng và quét thư mục
+                        applyFolders();
+                    } else if (data.message && data.message !== 'Cancelled') {
+                        showToast("Lỗi duyệt thư mục: " + data.message, "error");
+                    }
+                } else {
+                    showToast("Lỗi từ máy chủ khi chọn thư mục!", "error");
+                }
+            } catch (err) {
+                console.error(err);
+                showToast("Lỗi kết nối khi chọn thư mục", "error");
+            }
+        }
+
+        async function applyFolders() {
+            const inputDir = document.getElementById('input-dir-path').value.trim();
+            const outputDir = document.getElementById('output-dir-path').value.trim();
+            if (!inputDir || !outputDir) {
+                showToast("Vui lòng nhập cả thư mục nguồn và thư mục đầu ra!", "error");
+                return;
+            }
+            try {
+                const response = await fetch('/api/set_folders', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ input_dir: inputDir, output_dir: outputDir })
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    showToast("Đã cập nhật cấu hình thư mục!");
+                    updateFileSelectorOptions(data.tex_files || []);
+                } else {
+                    showToast("Lỗi cập nhật thư mục!", "error");
+                }
+            } catch (err) {
+                console.error(err);
+                showToast("Lỗi kết nối khi cập nhật thư mục", "error");
+            }
+        }
+
+        async function selectFile(filename) {
+            selectedFilename = filename;
+            if (!filename) return;
+            try {
+                const response = await fetch('/api/select_file', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ file: filename })
+                });
+                if (response.ok) {
+                    showToast(`Đã chọn tệp TeX: ${filename}`);
+                    updatePreviewGallery();
+                } else {
+                    showToast(`Tệp ${filename} không tồn tại trên hệ thống!`, "error");
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function runParserAction(actionType) {
+            if (actionType === 'inject_single' && !selectedFilename) {
+                showToast("Vui lòng chọn một tệp TeX cần đổi style!", "error");
+                return;
+            }
+            const btn = actionType === 'inject_single' ? document.getElementById('inject-single-btn') : document.getElementById('inject-all-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...';
+            btn.disabled = true;
+
+            const logWin = document.getElementById('log-window');
+            logWin.innerHTML = `[Hệ thống] Đang thực hiện ${actionType} với theme "${currentStyleName}"...\n`;
+
+            try {
+                const response = await fetch('/api/run_parser', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: actionType,
+                        style_name: currentStyleName,
+                        file: selectedFilename
+                    })
+                });
+
+                const result = await response.json();
+                logWin.innerHTML += result.output;
+                
+                if (result.success) {
+                    showToast("Đã thay đổi Style thành công!");
+                } else {
+                    showToast("Thay đổi Style thất bại!", "error");
+                }
+            } catch (err) {
+                logWin.innerHTML += `[Lỗi] Kết nối thất bại: ${err}\n`;
+                showToast("Lỗi kết nối", "error");
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        async function compileAction(compileType) {
+            if (compileType === 'single' && !selectedFilename) {
+                showToast("Vui lòng chọn một tệp TeX cần biên dịch!", "error");
+                return;
+            }
+            const btn = compileType === 'single' ? document.getElementById('compile-single-btn') : document.getElementById('compile-all-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang biên dịch...';
+            btn.disabled = true;
+
+            const logWin = document.getElementById('log-window');
+            logWin.innerHTML = `[Hệ thống] Đang biên dịch ${compileType === 'single' ? selectedFilename : 'tất cả tệp TeX'}...\n`;
+
+            try {
+                const response = await fetch('/api/compile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        compile_type: compileType,
+                        file: selectedFilename
+                    })
+                });
+
+                const result = await response.json();
+                logWin.innerHTML += result.output;
+                
+                if (result.success) {
+                    showToast("Biên dịch PDF thành công!");
+                    await updatePreviewGallery();
+                } else {
+                    showToast("Biên dịch PDF thất bại!", "error");
+                }
+            } catch (err) {
+                logWin.innerHTML += `[Lỗi] Kết nối biên dịch thất bại: ${err}\n`;
+                showToast("Lỗi kết nối khi biên dịch", "error");
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // Send POST request to open output folder
+        async function openOutputFolder() {
+            try {
+                const response = await fetch('/api/open_folder', { method: 'POST' });
+                if (response.ok) {
+                    showToast("Đang mở thư mục đầu ra trong Explorer...");
+                } else {
+                    const res = await response.json();
+                    showToast("Lỗi: " + (res.message || "Không thể mở thư mục"), "error");
+                }
+            } catch (err) {
+                showToast("Lỗi kết nối khi mở thư mục", "error");
+            }
+        }
+
+        // Initial setup
+        window.onload = function() {
+            fetchStyles();
+            fetchFolderInfo();
+        };
+    </script>
+
+    <!-- Modal chọn biểu tượng (Icon Picker) -->
+    <div class="modal-overlay" id="icon-picker-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-icons"></i> Chọn Biểu Tượng FontAwesome</h3>
+                <button class="modal-close-btn" onclick="closeIconPicker()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-search-bar">
+                <input type="text" id="icon-search-input" placeholder="Tìm kiếm biểu tượng (vd: book, pen, lightbulb, arrow, star, check)..." oninput="filterIcons()">
+            </div>
+            <div class="modal-body">
+                <div class="icon-grid" id="icon-grid-container">
+                    <!-- Sẽ được điền tự động bằng JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

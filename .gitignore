@@ -1,0 +1,38 @@
+# Python cache and byte-compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# IDE and Editor settings
+.windsurf/
+.vscode/
+.idea/
+
+# LaTeX build artifacts and temporary files
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+*.blg
+*.bbl
+*.pdf
+*.docx
+*.zip
+
+# Generated output directories
+generated_ex_test/
+pdf_to_tex_outputs/
+
+# Intermediate markdown and text extracts
+cautrucdethihsg10.md
+de_hsg10_so3_tracnghiem.md
+de_hsg12_so1.md
+de_hsg12_so2.md
+olmocr.md
+cau_truc_text.txt
+de_01_pdf_text.txt
+pdf_text.txt
+pdf_text_utf8.txt
